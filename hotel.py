@@ -8,7 +8,7 @@ class AVLTree:
             self.height = self.setHeight()
 
         def __str__(self):
-            return "Room Number:" + str(self.room_no) + "\nGuest : " + str(self.guest)
+            return "Room Number: " + str(self.room_no) + "\nGuest: " + str(self.guest)
 
         def setHeight(self):
                 a = self.getHeight(self.left)
@@ -28,20 +28,20 @@ class AVLTree:
     def __init__(self, root = None):
         self.root = None if root is None else root
 
-    def add(self, room_no):
+    def add(self, room_no, guest):
         room_no = int(room_no)
         if self.root == None:
-            self.root = AVLTree.AVLNode(room_no)
+            self.root = AVLTree.AVLNode(room_no, guest)
         else:
-            self.root = AVLTree._add(self.root, room_no)
+            self.root = AVLTree._add(self.root, room_no, guest)
 
-    def _add(root, room_no):
+    def _add(root, room_no, guest):
         if root is None:
-            return AVLTree.AVLNode(room_no)
+            return AVLTree.AVLNode(room_no, guest)
         elif room_no < root.room_no:
-            root.left = AVLTree._add(root.left, room_no)
+            root.left = AVLTree._add(root.left, room_no, guest)
         else:
-            root.right = AVLTree._add(root.right, room_no)
+            root.right = AVLTree._add(root.right, room_no, guest)
 
         root.setHeight()
         balance = root.balanceValue()
@@ -84,7 +84,7 @@ class AVLTree:
     def _in_Order(root):
         if not root is None:
             AVLTree._in_Order(root.left)
-            print(root.room_no, end=" ")
+            print(root)
             AVLTree._in_Order(root.right)
 
     def printTree(self):
@@ -100,8 +100,8 @@ class AVLTree:
 
 hotel = AVLTree()
 
-for i in range(1,100):
-    hotel.add(i)
+for i in range(1,10000):
+    hotel.add(i, f"G{i}")
 
 hotel.printTree()
 hotel.in_Order()
