@@ -101,7 +101,7 @@ class AVLTree:
 hotel = AVLTree()
 
 for i in range(1,10000):
-    hotel.add(i, f"G{i}")
+    hotel.add(i, f"G{i:05d}")
 
 hotel.printTree()
 hotel.in_Order()
