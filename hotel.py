@@ -160,7 +160,7 @@ class Hotel:
         for i in self.manual_rooms.in_order():
             print(i, end = " ")
 
-    def search(self, room_no):
+    def search_room(self, room_no):
         if room_no > self.total_room and self.manual_rooms.search(room_no):
             return f"Manual add"
         else:
@@ -238,7 +238,7 @@ class Hotel:
         filename = input("Enter file name (ex.'room.txt') : ")
         with open(filename, 'w', encoding='utf-8') as file:
             for room_no in range(1, self.total_room + 1):
-                result = self.search(room_no)
+                result = self.search_room(room_no)
                 file.write(f'Room {room_no} : {result}\n')
             for room_no in self.manual_rooms.in_order():
                 file.write(f'Room {room_no} : Manual add\n')
@@ -301,7 +301,7 @@ while True:
         room_no = int(input("Enter room number to search : "))
         print()
         start_time = time.time()
-        result = hotel.search(room_no)
+        result = hotel.search_room(room_no)
         print(f"Room {room_no} : {result}")
         end_time = time.time()
         print(f"Run time : {end_time - start_time:.20f} seconds")
