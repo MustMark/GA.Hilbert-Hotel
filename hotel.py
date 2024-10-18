@@ -1,10 +1,10 @@
 import time
+import sys
 
 class AVLTree:
     class AVLNode:
-        def __init__(self, room_no, guest=None):
+        def __init__(self, room_no):
             self.room_no = room_no
-            self.guest = guest
             self.left = None
             self.right = None
             self.height = 1
@@ -24,34 +24,43 @@ class AVLTree:
     def __init__(self):
         self.root = None
 
-    def add(self, room_no, guest):
-        self.root = self._add(self.root, room_no, guest)
-
-    def _add(self, node, room_no, guest):
-        if node is None:
-            return self.AVLNode(room_no, guest)
-        if room_no < node.room_no:
-            node.left = self._add(node.left, room_no, guest)
+    def add(self, room_no):
+        result, is_duplicate = self._add(self.root, room_no)
+        if is_duplicate:
+            return False
         else:
-            node.right = self._add(node.right, room_no, guest)
+            self.root = result
+            return True
+
+    def _add(self, node, room_no):
+        if node is None:
+            return self.AVLNode(room_no), False
+
+        if room_no < node.room_no:
+            node.left, is_duplicate = self._add(node.left, room_no)
+        elif room_no > node.room_no:
+            node.right, is_duplicate = self._add(node.right, room_no)
+        else:
+            return node, True
 
         node.setHeight()
-        return self._rebalance(node, room_no)
+        return self._rebalance(node), is_duplicate
 
-    def _rebalance(self, node, room_no):
+    def _rebalance(self, node):
         balance = node.balanceValue()
 
         if balance > 1:
-            if room_no < node.right.room_no:
+            if node.right.balanceValue() < 0:
                 node.right = self.rotateRightChild(node.right)
             return self.rotateLeftChild(node)
 
         if balance < -1:
-            if room_no >= node.left.room_no:
+            if node.left.balanceValue() > 0:
                 node.left = self.rotateLeftChild(node.left)
             return self.rotateRightChild(node)
 
         return node
+
 
     def rotateLeftChild(self, root):
         right = root.right
@@ -92,12 +101,12 @@ class AVLTree:
                 return node.left, True
 
             temp = self._get_min_value_node(node.right)
-            node.room_no, node.guest = temp.room_no, temp.guest
+            node.room_no = temp.room_no
             node.right, _ = self._delete(node.right, temp.room_no)
             deleted = True
-
+            
         node.setHeight()
-        return self._rebalance(node, room_no), deleted
+        return self._rebalance(node), deleted
 
     def _get_min_value_node(self, node):
         current = node
@@ -126,71 +135,195 @@ class AVLTree:
             result.append(node)
             self._in_order(node.right, result)
 
-    def printTree(self):
-        self._printTree(self.root, 0)
-
-    def _printTree(self, node, level=0):
-        if node is not None:
-            self._printTree(node.right, level + 1)
-            print('     ' * level + str(node.room_no))
-            self._printTree(node.left, level + 1)
-
 class Hotel:
     def __init__(self):
-        self.last_room = 0
+        self.people_distribution = []
+        self.total_room = 0
         self.manual_rooms = AVLTree()
     
-    def add_guest(self, guest):
-        self.rooms.append(guest)
-    
-    def automatic_add(self, airplane_carrier, airplane, truck, motorcycle, guest):
-        count = airplane_carrier * airplane * truck * motorcycle * guest
-        self.last_room = count
-        # for a in range(1, airplane_carrier+1):
-        #     for b in range(1, airplane+1):
-        #         for c in range(1, truck+1):
-        #             for d in range(1, motorcycle+1):
-        #                 for e in range(1, guest+1):
-        #                     self.add_guest(f"no.{a}_{b}_{c}_{d}_{e}")
-    
-    # def automatic_add(self, airplane_carrier, airplane, truck, motorcycle, guest):
-    #     for i in range(count):
-    #         a = (i // (airplane * truck * motorcycle * guest)) % airplane_carrier + 1
-    #         b = (i // (truck * motorcycle * guest)) % airplane + 1
-    #         c = (i // (motorcycle * guest)) % truck + 1
-    #         d = (i // guest) % motorcycle + 1
-    #         e = i % guest + 1
-    #         hotel.add_guest(f"no.{a}_{b}_{c}_{d}_{e}")
-
-    def manual_add(self, room_no, guest):
-        if room_no > self.last_room:
-            self.manual_rooms.add(room_no, guest)
-            print(f"room {room_no} added")
+    def manual_add(self, room_no):
+        if room_no > self.total_room and self.manual_rooms.add(room_no):
+            return f"room {room_no} added"
         else:
-            print(f"room {room_no} already exists")
+            return f"room {room_no} already exists"   
 
     def manual_delete(self, room_no):
-        if room_no > self.last_room and self.manual_rooms.delete(room_no):
-            print(f"room {room_no} deleted")
+        if room_no > self.total_room and self.manual_rooms.delete(room_no):
+            return f"room {room_no} deleted"
         else:
-            print(f"room {room_no} is not manual room")
+            return f"room {room_no} is not manual room"
+
+    def sort_rooms(self):
+        print(self.total_room)
+        for i in range(1, self.total_room + 1):
+            print(i, end = " ")
+        for i in self.manual_rooms.in_order():
+            print(i, end = " ")
+
+    def search(self, room_no):
+        if room_no > self.total_room and self.manual_rooms.search(room_no):
+            return f"Manual add"
+        else:
+            people_distribution = self.people_distribution + [0] * (5 - len(self.people_distribution))
+            people_in_channel_1 = people_distribution[0]
+            people_in_channel_2 = people_distribution[1] * 2
+            people_in_channel_3 = people_distribution[2] * 8
+            people_in_channel_4 = people_distribution[3] * 64
+            people_in_channel_5 = people_distribution[4] * 1024
+            
+            previous_people = 0
+            
+            if room_no <= people_in_channel_1:
+                return f'no_{room_no}'
+            
+            previous_people += people_in_channel_1
+            if room_no <= previous_people + people_in_channel_2:
+                person_in_motorcycle = room_no - previous_people
+                bike_number = (person_in_motorcycle - 1) // 2 + 1
+                person_on_bike = (person_in_motorcycle - 1) % 2 + 1
+                return f'no_{person_on_bike}_{bike_number}'
+            
+            previous_people += people_in_channel_2
+            if room_no <= previous_people + people_in_channel_3:
+                person_in_truck = room_no - previous_people
+                truck_number = (person_in_truck - 1) // 8 + 1
+                remaining_people_in_truck = (person_in_truck - 1) % 8
+                bike_number = (remaining_people_in_truck // 2) + 1
+                person_on_bike = (remaining_people_in_truck % 2) + 1
+                return f'no_{person_on_bike}_{bike_number}_{truck_number}'
+            
+            previous_people += people_in_channel_3
+            if room_no <= previous_people + people_in_channel_4:
+                person_in_plane = room_no - previous_people
+                plane_number = (person_in_plane - 1) // 64 + 1
+                remaining_people_in_plane = (person_in_plane - 1) % 64
+                truck_number = (remaining_people_in_plane // 8) + 1
+                remaining_people_in_truck = remaining_people_in_plane % 8
+                bike_number = (remaining_people_in_truck // 2) + 1
+                person_on_bike = (remaining_people_in_truck % 2) + 1
+                return f'no_{person_on_bike}_{bike_number}_{truck_number}_{plane_number}'
+            
+            previous_people += people_in_channel_4
+            if room_no <= previous_people + people_in_channel_5:
+                person_in_ship = room_no - previous_people
+                ship_number = (person_in_ship - 1) // 1024 + 1
+                remaining_people_in_ship = (person_in_ship - 1) % 1024
+                plane_number = (remaining_people_in_ship // 64) + 1
+                remaining_people_in_plane = remaining_people_in_ship % 64
+                truck_number = (remaining_people_in_plane // 8) + 1
+                remaining_people_in_truck = remaining_people_in_plane % 8
+                bike_number = (remaining_people_in_truck // 2) + 1
+                person_on_bike = (remaining_people_in_truck % 2) + 1
+                return f'no_{person_on_bike}_{bike_number}_{truck_number}_{plane_number}_{ship_number}'
+            
+        return "Not found"
     
-    def sort_room(self):
-        print(self.last_room)
-        rooms = []
-        for i in range(1, self.last_room + 1):
-            rooms.append(i)
-        rooms.extend(self.manual_rooms.in_order())
-        print(", ".join(str(node) for node in rooms))
+    def start(self):
+        print()
+        people_input = input("Enter Airplane carrier, Airplane, Truck, Motorcycle, Guest (split by ' '): ")
+        start_time = time.time()
+        self.people_distribution = list(map(int, people_input.split()))
+        self.total_room = sum([
+            self.people_distribution[0],
+            self.people_distribution[1] * 2,
+            self.people_distribution[2] * 8,
+            self.people_distribution[3] * 64,
+            self.people_distribution[4] * 1024
+        ])
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
         
+    def write_to_file(self):
+        print()
+        filename = input("Enter file name (ex.'room.txt') : ")
+        with open(filename, 'w', encoding='utf-8') as file:
+            for room_no in range(1, self.total_room + 1):
+                result = self.search(room_no)
+                file.write(f'Room {room_no} : {result}\n')
+            for room_no in self.manual_rooms.in_order():
+                file.write(f'Room {room_no} : Manual add\n')
+        print(f"All room have been written to {filename}")
+    
+    def memory_usage(self):
+        total_size = sys.getsizeof(self)
+        total_size += sys.getsizeof(self.people_distribution)
+        total_size += sys.getsizeof(self.total_room)
+        total_size += sys.getsizeof(self.manual_rooms)
+        total_size += self._memory_usage_of_avl_tree(self.manual_rooms.root)
 
-
-airplane_carrier, airplane, truck, motorcycle, guest = [int(i) for i in input("Enter 1, 2, 3, 4, 5 : ").split()]
+        print(f"Total memory usage of Hotel : {total_size} bytes")
+    
+    def _memory_usage_of_avl_tree(self, node):
+        if node is None:
+            return 0
+        return (sys.getsizeof(node) + 
+                self._memory_usage_of_avl_tree(node.left) + 
+                self._memory_usage_of_avl_tree(node.right))
 
 hotel = Hotel()
+hotel.start()
 
-hotel.automatic_add(airplane_carrier, airplane, truck, motorcycle, guest)
-hotel.manual_add(100, "test")
-hotel.manual_add(200, "test")
-hotel.manual_delete(100)
-hotel.sort_room()
+while True:
+    print()
+    print("--- Hotel Command Menu ---")
+    print("1 : Manual add room")
+    print("2 : Manual delete room")
+    print("3 : Sort rooms")
+    print("4 : Search room by number")
+    print("5 : Show free rooms")
+    print("6 : Write to file")
+    print("7 : Show memory usage")
+    print("8 : Exit")
+    
+    command = input("Enter command : ")
+
+    if command == "1":
+        room_no = int(input("Enter room number to add : "))
+        print()
+        start_time = time.time()
+        print(hotel.manual_add(room_no))
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
+    elif command == "2":
+        room_no = int(input("Enter room number to delete : "))
+        print()
+        start_time = time.time()
+        print(hotel.manual_delete(room_no))
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
+    elif command == "3":
+        print()
+        start_time = time.time()
+        hotel.sort_rooms()
+        end_time = time.time()
+        print(f"\nRun time : {end_time - start_time:.20f} seconds")
+    elif command == "4":
+        room_no = int(input("Enter room number to search : "))
+        print()
+        start_time = time.time()
+        result = hotel.search(room_no)
+        print(f"Room {room_no} : {result}")
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
+    elif command == "5":
+        print()
+        start_time = time.time()
+        print(f"Free room : {None}")
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
+    elif command == "6":
+        start_time = time.time()
+        hotel.write_to_file()
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
+    elif command == "7":
+        print()
+        hotel.memory_usage()
+    elif command == "8":
+        print()
+        print("Exit the program !")
+        print()
+        break
+    else:
+        print()
+        print("Wrong command ! please select 1 - 8")
