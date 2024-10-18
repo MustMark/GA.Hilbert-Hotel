@@ -1,107 +1,55 @@
-class AVLTree:
-    class AVLNode:
-        def __init__(self, room_no, guest = None, left = None, right = None):
-            self.room_no = room_no
-            self.guest = None if guest is None else guest
-            self.left = None if left is None else left
-            self.right = None if right is None else right
-            self.height = self.setHeight()
+import time
 
-        def __str__(self):
-            return "Room Number: " + str(self.room_no) + "\nGuest: " + str(self.guest)
+class Hotel:
+    def __init__(self):
+        self.last_room = 0
+        self.manual_rooms = {}
+    
+    def add_guest(self, guest):
+        self.rooms.append(guest)
+    
+    def automatic_add(self, airplane_carrier, airplane, truck, motorcycle, guest):
+        count = airplane_carrier * airplane * truck * motorcycle * guest
+        self.last_room = count
+        # for a in range(1, airplane_carrier+1):
+        #     for b in range(1, airplane+1):
+        #         for c in range(1, truck+1):
+        #             for d in range(1, motorcycle+1):
+        #                 for e in range(1, guest+1):
+        #                     self.add_guest(f"no.{a}_{b}_{c}_{d}_{e}")
+    
+    # def automatic_add(self, airplane_carrier, airplane, truck, motorcycle, guest):
+    #     for i in range(count):
+    #         a = (i // (airplane * truck * motorcycle * guest)) % airplane_carrier + 1
+    #         b = (i // (truck * motorcycle * guest)) % airplane + 1
+    #         c = (i // (motorcycle * guest)) % truck + 1
+    #         d = (i // guest) % motorcycle + 1
+    #         e = i % guest + 1
+    #         hotel.add_guest(f"no.{a}_{b}_{c}_{d}_{e}")
 
-        def setHeight(self):
-                a = self.getHeight(self.left)
-                b = self.getHeight(self.right)
-
-                self.height = 1 + max(a,b)
-
-                return self.height     
-
-        def getHeight(self, node):
-            return -1 if node == None else node.height
-
-        def balanceValue(self):      
-            return self.getHeight(self.right) - self.getHeight(self.left)
-        
-
-    def __init__(self, root = None):
-        self.root = None if root is None else root
-
-    def add(self, room_no, guest):
-        room_no = int(room_no)
-        if self.root == None:
-            self.root = AVLTree.AVLNode(room_no, guest)
+    def manual_add(self, room, guest):
+        if room > self.last_room:
+            self.last_room = room
+            self.manual_rooms[room] = guest
+            print(f"room {room} added")
         else:
-            self.root = AVLTree._add(self.root, room_no, guest)
+            print(f"room {room} already exists")
 
-    def _add(root, room_no, guest):
-        if root is None:
-            return AVLTree.AVLNode(room_no, guest)
-        elif room_no < root.room_no:
-            root.left = AVLTree._add(root.left, room_no, guest)
+    def manual_delete(self, room):
+        if room in self.manual_rooms:
+            self.manual_rooms.pop(room)
         else:
-            root.right = AVLTree._add(root.right, room_no, guest)
-
-        root.setHeight()
-        balance = root.balanceValue()
-        
-        if balance > 1:
-            if room_no < root.right.room_no:
-                root.right = AVLTree.rotateRightChild(root.right)
-            return AVLTree.rotateLeftChild(root)
-        elif balance < -1:
-            if room_no >= root.left.room_no:
-                root.left = AVLTree.rotateLeftChild(root.left)
-            return AVLTree.rotateRightChild(root)
-        return root
-
-    def rotateLeftChild(root):
-        right = root.right
-        if right == None:
-            return root
-        root.right = right.left
-        right.left = root
-        root.setHeight()
-        right.setHeight()
-        return right
-
-    def rotateRightChild(root):
-        left = root.left
-        if left == None:
-            return root
-        root.left = left.right
-        left.right = root
-        root.setHeight()
-        left.setHeight()
-        return left
-
-    def in_Order(self):
-        print("AVLTree post-order : ", end="")
-        AVLTree._in_Order(self.root)
-        print()
-
-    def _in_Order(root):
-        if not root is None:
-            AVLTree._in_Order(root.left)
-            print(root)
-            AVLTree._in_Order(root.right)
-
-    def printTree(self):
-        AVLTree._printTree(self.root)
-        print()
-
-    def _printTree(node , level=0):
-        if not node is None:
-            AVLTree._printTree(node.right, level + 1)
-            print('     ' * level, node.room_no)
-            AVLTree._printTree(node.left, level + 1)
+            print(f"room {room} is not manual room")
+    
+    def sort_room(self):
+        print(self.last_room)
+        for i in range(1, self.last_room + 1):
+            print(i)
 
 
-hotel = AVLTree()
+airplane_carrier, airplane, truck, motorcycle, guest = [int(i) for i in input("Enter 1, 2, 3, 4, 5 : ").split()]
 
-for i in range(1,10000):
-    hotel.add(i, f"G{i:05d}")
+hotel = Hotel()
 
-hotel.printTree()
-hotel.in_Order()
+hotel.automatic_add(airplane_carrier, airplane, truck, motorcycle, guest)
+hotel.sort_room()
