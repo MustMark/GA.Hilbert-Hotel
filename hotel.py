@@ -154,7 +154,6 @@ class Hotel:
             return f"room {room_no} is not manual room"
 
     def sort_rooms(self):
-        print(self.total_room)
         for i in range(1, self.total_room + 1):
             print(i, end = " ")
         for i in self.manual_rooms.in_order():
@@ -217,10 +216,10 @@ class Hotel:
                 return f'no_{person_on_bike}_{bike_number}_{truck_number}_{plane_number}_{ship_number}'
             
         return "Not found"
-    
+        
     def start(self):
         print()
-        people_input = input("Enter Airplane carrier, Airplane, Truck, Motorcycle, Guest (split by ' '): ")
+        people_input = input("Enter Guest, Motorcycle, Truck, Airplane, Airplane carrier (split by ' '): ")
         start_time = time.time()
         self.people_distribution = list(map(int, people_input.split()))
         self.total_room = sum([
