@@ -236,6 +236,7 @@ class Hotel:
     def write_to_file(self):
         print()
         filename = input("Enter file name (ex.'room.txt') : ")
+        start_time = time.time()
         with open(filename, 'w', encoding='utf-8') as file:
             for room_no in range(1, self.total_room + 1):
                 result = self.search_room(room_no)
@@ -243,6 +244,8 @@ class Hotel:
             for room_no in self.manual_rooms.in_order():
                 file.write(f'Room {room_no} : Manual add\n')
         print(f"All room have been written to {filename}")
+        end_time = time.time()
+        print(f"Run time : {end_time - start_time:.20f} seconds")
     
     def memory_usage(self):
         total_size = sys.getsizeof(self)
@@ -312,10 +315,7 @@ while True:
         end_time = time.time()
         print(f"Run time : {end_time - start_time:.20f} seconds")
     elif command == "6":
-        start_time = time.time()
         hotel.write_to_file()
-        end_time = time.time()
-        print(f"Run time : {end_time - start_time:.20f} seconds")
     elif command == "7":
         print()
         hotel.memory_usage()
